@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Function to check if a command is installed
+check_command() {
+  if ! command -v "$1" &>/dev/null; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Function to install kubectl
+install_kubectl() {
+  local desired_version="1.26.0"
+  if ! check_command kubectl; then
+    echo "Installing kubectl version $desired_version..."
+    curl -LO "https://dl.k8s.io/release/$desired_version/bin/linux/amd64/kubectl"
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/
+    echo "kubectl version $desired_version installed successfully."
+  else
+    local installed_version=$(kubectl version --client --short | awk -Fv '/Client Version: /{print $2}')
+    if [ "$installed_version" == "$desired_version" ]; then
+      echo "kubectl version $desired_version is already installed."
+    else
+      echo "Updating kubectl to version $desired_version..."
+      curl -LO "https://dl.k8s.io/release/$desired_version/bin/linux/amd64/kubectl"
+      chmod +x kubectl
+      sudo mv kubectl /usr/local/bin/
+      echo "kubectl updated to version $desired_version."
+    fi
+  fi
+}
+
+# Function to install aws-cli v2
+install_aws_cli() {
+  if ! check_command aws; then
+    echo "Installing AWS CLI version 2..."
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install
+    rm -rf aws awscliv2.zip
+    echo "AWS CLI version 2 installed successfully."
+  else
+    echo "AWS CLI version 2 is already installed."
+  fi
+}
+
+# Function to install aws-iam-authenticator
+install_iam_authenticator() {
+  if ! check_command aws-iam-authenticator; then
+    echo "Installing aws-iam-authenticator..."
+    curl -o aws-iam-authenticator "https://amazon-eks.s3.us-west-2.amazonaws.com/$desired_version/2021-07-05/bin/linux/amd64/aws-iam-authenticator"
+    chmod +x aws-iam-authenticator
+    sudo mv aws-iam-authenticator /usr/local/bin/
+    echo "aws-iam-authenticator installed successfully."
+  else
+    echo "aws-iam-authenticator is already installed."
+  fi
+}
+
+# Main script
+install_kubectl
+install_aws_cli
+install_iam_authenticator
