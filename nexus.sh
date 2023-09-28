@@ -23,4 +23,8 @@ https://www.howtoforge.com/how-to-install-and-configure-nexus-repository-manager
 
 ```
 docker run -d -p 8081:8081 --name nexus sonatype/nexus3
-```
+'''
+'''
+docker exec -i nexus_repo cat /nexus-data/admin.password
+'''
+
